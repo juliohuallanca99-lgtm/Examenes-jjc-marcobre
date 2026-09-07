@@ -1,8 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { LOGO_JJC_BASE64 } from "@/lib/pdf/logo";
+
+interface FilaCapacitacion {
+  nombres: string;
+  apellidos: string;
+  curso: string;
+  fecha: string;
+  vigente: boolean;
+}
 
 function formatearFecha(iso: string) {
   return new Date(iso).toLocaleDateString("es-PE", {
@@ -12,57 +20,37 @@ function formatearFecha(iso: string) {
   });
 }
 
-function calcularVencimiento(iso: string) {
-  const d = new Date(iso);
-  d.setFullYear(d.getFullYear() + 1);
-  return d;
-}
-
 export default function VerificacionPage() {
-  const { cursos, intentos, loaded } = useStore();
   const [dni, setDni] = useState("");
   const [buscado, setBuscado] = useState("");
+  const [filas, setFilas] = useState<FilaCapacitacion[] | null>(null);
+  const [buscando, setBuscando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleBuscar(e: React.FormEvent) {
+  async function handleBuscar(e: React.FormEvent) {
     e.preventDefault();
-    setBuscado(dni.trim());
+    const consulta = dni.trim();
+    if (!consulta) return;
+
+    setBuscando(true);
+    setError(null);
+    setFilas(null);
+    setBuscado(consulta);
+
+    try {
+      const { data, error } = await supabase.rpc("consultar_capacitaciones", {
+        p_dni: consulta,
+      });
+      if (error) throw error;
+      setFilas((data as FilaCapacitacion[]) ?? []);
+    } catch (err: any) {
+      setError(err?.message ?? "No se pudo realizar la consulta. Intenta de nuevo.");
+    } finally {
+      setBuscando(false);
+    }
   }
 
-  const resultado = useMemo(() => {
-    if (!buscado) return null;
-    const aprobados = intentos.filter((i) => i.dni.trim() === buscado && i.estado === "aprobado");
-    if (aprobados.length === 0) return { encontrado: false as const };
-
-    const porCurso = new Map<string, (typeof aprobados)[number]>();
-    for (const i of aprobados) {
-      const actual = porCurso.get(i.cursoId);
-      if (!actual || new Date(i.fecha) > new Date(actual.fecha)) {
-        porCurso.set(i.cursoId, i);
-      }
-    }
-
-    const masReciente = aprobados.reduce((a, b) => (new Date(a.fecha) > new Date(b.fecha) ? a : b));
-
-    const filas = Array.from(porCurso.values())
-      .map((i) => {
-        const curso = cursos.find((c) => c.id === i.cursoId);
-        const vencimiento = calcularVencimiento(i.fecha);
-        const vigente = new Date() <= vencimiento;
-        return {
-          nombreCurso: curso?.nombre ?? "(curso eliminado)",
-          fecha: i.fecha,
-          vigente,
-        };
-      })
-      .sort((a, b) => a.nombreCurso.localeCompare(b.nombreCurso));
-
-    return {
-      encontrado: true as const,
-      nombres: masReciente.nombres,
-      apellidos: masReciente.apellidos,
-      filas,
-    };
-  }, [buscado, intentos, cursos]);
+  const trabajador = filas && filas.length > 0 ? filas[0] : null;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -88,16 +76,20 @@ export default function VerificacionPage() {
         />
         <button
           type="submit"
-          disabled={!loaded || !dni.trim()}
+          disabled={buscando || !dni.trim()}
           className="focus-ring shrink-0 rounded-lg bg-navy-900 px-5 py-3 text-sm font-medium text-white hover:bg-navy-800 disabled:opacity-50"
         >
-          Buscar
+          {buscando ? "Buscando..." : "Buscar"}
         </button>
       </form>
 
-      {!loaded && buscado && <p className="mt-8 text-center text-sm text-ink/50">Cargando...</p>}
+      {error && (
+        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-      {loaded && resultado && !resultado.encontrado && (
+      {!buscando && filas !== null && filas.length === 0 && (
         <div className="mt-8 rounded-lg border border-dashed border-line bg-white/60 px-6 py-10 text-center">
           <p className="text-sm text-ink/60">
             No se encontró ningún registro de capacitaciones aprobadas para el DNI {buscado}.
@@ -105,11 +97,11 @@ export default function VerificacionPage() {
         </div>
       )}
 
-      {loaded && resultado?.encontrado && (
+      {!buscando && trabajador && (
         <div className="mt-6 rounded-lg border border-line bg-white p-4">
           <p className="text-xs text-ink/50">JJC Contratistas Generales S.A.</p>
           <p className="mt-0.5 font-display text-lg font-800 text-ink">
-            {resultado.apellidos}, {resultado.nombres}
+            {trabajador.apellidos}, {trabajador.nombres}
           </p>
 
           <div className="mt-4 overflow-hidden rounded-md border border-line">
@@ -122,9 +114,9 @@ export default function VerificacionPage() {
                 </tr>
               </thead>
               <tbody>
-                {resultado.filas.map((f, idx) => (
+                {filas!.map((f, idx) => (
                   <tr key={idx} className="border-t border-line">
-                    <td className="px-3 py-2.5 text-ink">{f.nombreCurso}</td>
+                    <td className="px-3 py-2.5 text-ink">{f.curso}</td>
                     <td className="px-3 py-2.5">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
