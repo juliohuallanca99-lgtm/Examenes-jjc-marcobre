@@ -58,6 +58,7 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
   const [busquedaFecha, setBusquedaFecha] = useState("");
   const [generandoQr, setGenerandoQr] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set());
 
   if (!loaded) return null;
 
@@ -135,12 +136,35 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
     setGenerandoZip(true);
     try {
       const { generarConstanciasZip } = await import("@/lib/pdf/generarConstanciasZip");
-      await generarConstanciasZip(curso!, intentos, preguntas);
+      await generarConstanciasZip(curso!, aDescargar, preguntas);
     } catch (err: any) {
       setErrorAccion(err?.message ?? "No se pudo generar el archivo ZIP.");
     } finally {
       setGenerandoZip(false);
     }
+  }
+
+  function alternarSeleccion(id: string) {
+    setSeleccionados((prev) => {
+      const copia = new Set(prev);
+      if (copia.has(id)) copia.delete(id);
+      else copia.add(id);
+      return copia;
+    });
+  }
+
+  function alternarTodosVisibles() {
+    const idsDescargables = intentosFiltrados
+      .filter((i) => i.estado !== "pendiente_revision")
+      .map((i) => i.id);
+    const todosMarcados =
+      idsDescargables.length > 0 && idsDescargables.every((id) => seleccionados.has(id));
+    setSeleccionados((prev) => {
+      const copia = new Set(prev);
+      if (todosMarcados) idsDescargables.forEach((id) => copia.delete(id));
+      else idsDescargables.forEach((id) => copia.add(id));
+      return copia;
+    });
   }
 
   async function handleGenerarQr() {
@@ -176,7 +200,6 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
     }
   }
 
-  const calificados = intentos.filter((i) => i.estado !== "pendiente_revision");
   const intentosFiltrados = intentos.filter((i) => {
     const coincideNombre =
       !busquedaNombre.trim() ||
@@ -184,6 +207,28 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
     const coincideFecha = !busquedaFecha || fechaLocalISO(i.fecha) === busquedaFecha;
     return coincideNombre && coincideFecha;
   });
+
+  // Solo los calificados generan constancia (los pendientes de revision no).
+  const descargablesFiltrados = intentosFiltrados.filter(
+    (i) => i.estado !== "pendiente_revision"
+  );
+  const seleccionadosDescargables = descargablesFiltrados.filter((i) => seleccionados.has(i.id));
+
+  // Si hay seleccion manual, manda esa. Si no, lo que este filtrado en pantalla.
+  const aDescargar =
+    seleccionadosDescargables.length > 0 ? seleccionadosDescargables : descargablesFiltrados;
+
+  const hayFiltroActivo = Boolean(busquedaNombre.trim() || busquedaFecha);
+  const todosVisiblesMarcados =
+    descargablesFiltrados.length > 0 &&
+    descargablesFiltrados.every((i) => seleccionados.has(i.id));
+
+  const textoBotonDescarga =
+    seleccionadosDescargables.length > 0
+      ? `Descargar seleccionados (${seleccionadosDescargables.length})`
+      : hayFiltroActivo
+      ? `Descargar filtrados (${descargablesFiltrados.length})`
+      : `Descargar todos (${descargablesFiltrados.length})`;
 
   return (
     <div>
@@ -449,13 +494,21 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
             onChange={(e) => setBusquedaFecha(e.target.value)}
             className="focus-ring rounded-md border border-line bg-white px-3 py-2 text-sm"
           />
-          {calificados.length > 0 && (
+          {seleccionados.size > 0 && (
+            <button
+              onClick={() => setSeleccionados(new Set())}
+              className="focus-ring shrink-0 rounded-md px-3 py-2 text-sm font-medium text-ink/60 hover:text-ink"
+            >
+              Limpiar selección
+            </button>
+          )}
+          {descargablesFiltrados.length > 0 && (
             <button
               onClick={handleDescargarTodos}
               disabled={generandoZip}
               className="focus-ring shrink-0 rounded-md bg-navy-900 px-4 py-2 text-sm font-medium text-white hover:bg-navy-800 disabled:opacity-60"
             >
-              {generandoZip ? "Generando ZIP..." : `Descargar todos (${calificados.length})`}
+              {generandoZip ? "Generando ZIP..." : textoBotonDescarga}
             </button>
           )}
         </div>
@@ -474,6 +527,16 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
           <table className="w-full text-left text-sm">
             <thead className="bg-paper text-xs text-ink/50">
               <tr>
+                <th className="w-10 px-4 py-2 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={todosVisiblesMarcados}
+                    onChange={alternarTodosVisibles}
+                    disabled={descargablesFiltrados.length === 0}
+                    title="Seleccionar todos los visibles"
+                    className="h-3.5 w-3.5 accent-gold-600"
+                  />
+                </th>
                 <th className="px-4 py-2 font-medium">Trabajador</th>
                 <th className="px-4 py-2 font-medium">DNI</th>
                 <th className="px-4 py-2 font-medium">Nota</th>
@@ -488,8 +551,24 @@ export default function CursoDetallePage({ params }: { params: { id: string } })
                 <tr
                   key={i.id}
                   onClick={() => (window.location.href = `/cursos/${curso.id}/resultados/${i.id}`)}
-                  className="cursor-pointer border-t border-line hover:bg-paper"
+                  className={`cursor-pointer border-t border-line hover:bg-paper ${
+                    seleccionados.has(i.id) ? "bg-gold-100/40" : ""
+                  }`}
                 >
+                  <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={seleccionados.has(i.id)}
+                      onChange={() => alternarSeleccion(i.id)}
+                      disabled={i.estado === "pendiente_revision"}
+                      title={
+                        i.estado === "pendiente_revision"
+                          ? "Pendiente de revisión: aún no genera constancia"
+                          : "Seleccionar para descarga"
+                      }
+                      className="h-3.5 w-3.5 accent-gold-600 disabled:opacity-30"
+                    />
+                  </td>
                   <td className="px-4 py-2.5 text-ink">
                     {i.nombres} {i.apellidos}
                   </td>
