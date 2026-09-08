@@ -234,19 +234,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       puntajeObtenido: intento.puntajeObtenido,
       puntajeTotal: intento.puntajeTotal,
     };
-    const { data, error } = await supabase
-      .from("intentos_examen")
-      .insert({
-        curso_id: intento.cursoId,
+    const fila = {
+      curso_id: intento.cursoId,
+      dni: intento.dni,
+      nombres: intento.nombres,
+      apellidos: intento.apellidos,
+      instructor: intento.instructor,
+      respuestas: payload,
+      nota: intento.nota,
+      estado: intento.estado,
+      fecha_fin: intento.fecha ?? new Date().toISOString(),
+    };
+
+    // El trabajador que rinde el examen no tiene permiso de LECTURA sobre
+    // intentos_examen (por privacidad). Pedir la fila de vuelta con .select()
+    // haria fallar el registro, asi que solo se insertan sus datos.
+    if (!session) {
+      const { error } = await supabase.from("intentos_examen").insert(fila);
+      if (error) throw error;
+      return {
+        id: "",
+        cursoId: intento.cursoId,
         dni: intento.dni,
         nombres: intento.nombres,
         apellidos: intento.apellidos,
         instructor: intento.instructor,
-        respuestas: payload,
+        respuestas: intento.respuestas,
+        puntajeObtenido: intento.puntajeObtenido,
+        puntajeTotal: intento.puntajeTotal,
         nota: intento.nota,
         estado: intento.estado,
-        fecha_fin: intento.fecha ?? new Date().toISOString(),
-      })
+        fecha: fila.fecha_fin,
+      };
+    }
+
+    // Con sesion iniciada si se recupera la fila, para refrescar la tabla al instante.
+    const { data, error } = await supabase
+      .from("intentos_examen")
+      .insert(fila)
       .select()
       .single();
     if (error || !data) throw error ?? new Error("No se pudo registrar el examen");
