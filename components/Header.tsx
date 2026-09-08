@@ -18,7 +18,7 @@ export default function Header() {
   return (
     <header className="bg-navy-900 text-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <Link href={esVistaPublica ? pathname! : "/"} className="flex items-baseline gap-3">
+        <Link href={session ? "/" : pathname!} className="flex items-baseline gap-3">
           <span className="font-display text-lg font-800 tracking-tight">JJC</span>
           <span className="h-4 w-px bg-navy-600" />
           <span className="font-body text-sm text-navy-100/80 tracking-wide">
