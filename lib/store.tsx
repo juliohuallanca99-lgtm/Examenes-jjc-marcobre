@@ -96,7 +96,7 @@ function intentoFromRow(row: any): Intento {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const { session } = useAuth();
+  const { session, cargando: cargandoSesion } = useAuth();
   const usuarioEmail = session?.user?.email;
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([]);
@@ -129,9 +129,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Las politicas de seguridad de la base de datos dependen de la sesion.
+  // Si consultamos antes de que Supabase termine de restaurarla, la peticion
+  // viaja sin credenciales y vuelve vacia (la pantalla salia en blanco hasta
+  // recargar). Por eso esperamos a que la sesion este resuelta.
   useEffect(() => {
+    if (cargandoSesion) return;
     recargar();
-  }, [recargar]);
+  }, [cargandoSesion, session?.user?.id, recargar]);
 
   const crearCurso: StoreContextValue["crearCurso"] = async (curso) => {
     const { data, error } = await supabase
