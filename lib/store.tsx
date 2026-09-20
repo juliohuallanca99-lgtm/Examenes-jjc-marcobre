@@ -95,6 +95,38 @@ function intentoFromRow(row: any): Intento {
   };
 }
 
+// Supabase nunca devuelve mas de 1000 filas por consulta. Como el sistema ya
+// supera ese numero de examenes rendidos, pedir todo de golpe dejaba fuera los
+// registros del final: por eso faltaban preguntas en algunos cursos y no se
+// veian todos los examenes. Esta funcion pide los datos por paginas de 1000
+// hasta que la tabla se agota, de modo que siempre llega la informacion completa.
+const TAMANO_PAGINA = 1000;
+
+async function traerTodo(
+  tabla: string,
+  ordenar: (consulta: any) => any
+): Promise<{ data: any[] | null; error: any }> {
+  const filas: any[] = [];
+  let desde = 0;
+
+  // Se repite hasta que una pagina vuelva incompleta: eso indica que ya no hay mas.
+  for (;;) {
+    const { data, error } = await ordenar(supabase.from(tabla).select("*")).range(
+      desde,
+      desde + TAMANO_PAGINA - 1
+    );
+    if (error) return { data: null, error };
+
+    const lote = data ?? [];
+    filas.push(...lote);
+
+    if (lote.length < TAMANO_PAGINA) break;
+    desde += TAMANO_PAGINA;
+  }
+
+  return { data: filas, error: null };
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const { session, cargando: cargandoSesion } = useAuth();
   const usuarioEmail = session?.user?.email;
@@ -108,10 +140,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const recargar = useCallback(async () => {
     try {
       const [cursosRes, preguntasRes, intentosRes, carpetasRes] = await Promise.all([
-        supabase.from("cursos").select("*").order("created_at", { ascending: false }),
-        supabase.from("preguntas").select("*").order("orden", { ascending: true }),
-        supabase.from("intentos_examen").select("*").order("created_at", { ascending: false }),
-        supabase.from("carpetas").select("*").order("nombre", { ascending: true }),
+        traerTodo("cursos", (q) => q.order("created_at", { ascending: false }).order("id", { ascending: true })),
+        traerTodo("preguntas", (q) =>
+          q.order("curso_id", { ascending: true }).order("orden", { ascending: true }).order("id", { ascending: true })
+        ),
+        traerTodo("intentos_examen", (q) =>
+          q.order("created_at", { ascending: false }).order("id", { ascending: true })
+        ),
+        traerTodo("carpetas", (q) => q.order("nombre", { ascending: true }).order("id", { ascending: true })),
       ]);
       if (cursosRes.error) throw cursosRes.error;
       if (preguntasRes.error) throw preguntasRes.error;
