@@ -10,7 +10,7 @@ const EMAIL_SUPERADMIN = "70246124@jjc.com.pe";
 // depende de la fuente del equipo y en varias maquinas se ve como un cuadro.
 function IconoInicio() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <path d="M3.2 8.4L10 3l6.8 5.4V16a1 1 0 01-1 1h-3.4v-4.6H7.6V17H4.2a1 1 0 01-1-1V8.4z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
     </svg>
   );
@@ -18,7 +18,7 @@ function IconoInicio() {
 
 function IconoCursos() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <rect x="3.2" y="3.4" width="13.6" height="13.2" rx="2" stroke="currentColor" strokeWidth="1.7" />
       <path d="M6.6 7.6h6.8M6.6 10.6h6.8M6.6 13.4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
@@ -27,7 +27,7 @@ function IconoCursos() {
 
 function IconoEstadisticas() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <path d="M4.6 15.4V9M10 15.4V4.6M15.4 15.4v-4.2" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   );
@@ -35,7 +35,7 @@ function IconoEstadisticas() {
 
 function IconoVerificar() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <path d="M10 3.4l5.8 2.3v4.1c0 3.3-2.3 5.7-5.8 6.8-3.5-1.1-5.8-3.5-5.8-6.8V5.7L10 3.4z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
       <path d="M7.6 9.8l1.8 1.8 3.2-3.4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -44,7 +44,7 @@ function IconoVerificar() {
 
 function IconoHistorial() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <circle cx="10" cy="10" r="6.6" stroke="currentColor" strokeWidth="1.7" />
       <path d="M10 6.2V10l2.6 1.7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
@@ -53,7 +53,7 @@ function IconoHistorial() {
 
 function IconoAlmacenamiento() {
   return (
-    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
       <ellipse cx="10" cy="5.6" rx="6.2" ry="2.4" stroke="currentColor" strokeWidth="1.7" />
       <path d="M3.8 5.6v8.8c0 1.3 2.8 2.4 6.2 2.4s6.2-1.1 6.2-2.4V5.6" stroke="currentColor" strokeWidth="1.7" />
       <path d="M3.8 10c0 1.3 2.8 2.4 6.2 2.4s6.2-1.1 6.2-2.4" stroke="currentColor" strokeWidth="1.7" />
@@ -117,7 +117,7 @@ export default function Sidebar() {
           onClick={() => cerrarSesion()}
           className="focus-ring flex shrink-0 items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 lg:mt-1"
         >
-          <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="shrink-0">
             <path d="M12.4 6.2V4.8a1.4 1.4 0 00-1.4-1.4H4.8a1.4 1.4 0 00-1.4 1.4v10.4a1.4 1.4 0 001.4 1.4H11a1.4 1.4 0 001.4-1.4v-1.4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
             <path d="M8.6 10h8m0 0l-2.6-2.6M16.6 10L14 12.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
