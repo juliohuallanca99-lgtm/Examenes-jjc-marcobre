@@ -28,8 +28,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Header />
       <div className="flex min-h-[calc(100vh-56px)] flex-col lg:flex-row">
         <Sidebar />
+        {/* El menu lateral ocupa 240 px, asi que el contenido se ensancha a
+            max-w-6xl para que la tabla de cursos no quede apretada. */}
         <main className="min-w-0 flex-1 px-5 py-8 sm:px-7 lg:px-9">
-          <div className="mx-auto max-w-5xl">{children}</div>
+          <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
     </>
