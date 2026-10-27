@@ -32,9 +32,23 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#202140" };
 
+// Se aplica el tema guardado antes de que el navegador pinte la pagina. Sin
+// esto, el sitio aparece un instante en claro y salta a oscuro, que molesta
+// bastante de noche. suppressHydrationWarning evita que React reclame por la
+// clase que este script agrega antes de que el arranque.
+const APLICAR_TEMA = `
+try {
+  var t = localStorage.getItem('jjc-tema');
+  if (t === 'oscuro') document.documentElement.classList.add('dark');
+} catch (e) {}
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: APLICAR_TEMA }} />
+      </head>
       <body className={`${manrope.variable} ${inter.variable} font-body`}>
         <AuthProvider>
           <StoreProvider>
