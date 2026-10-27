@@ -7,18 +7,41 @@ html {
 }
 
 body {
-  background-color: #F7F7F5;
-  color: #1C2430;
+  background-color: #F6F8FA;
+  color: #16181F;
 }
 
+/* Al seleccionar texto se usa el verde corporativo en su version clara. */
 ::selection {
-  background-color: #F6E9D2;
+  background-color: #D9F2EC;
+}
+
+/* Minimo de 44 px de alto para botones y campos: es la medida que permite
+   acertar con guante puesto en una tablet de obra. */
+button,
+[type="button"],
+[type="submit"],
+[type="text"],
+[type="search"],
+[type="date"],
+[type="number"],
+[type="password"],
+select {
+  min-height: 44px;
+}
+
+/* Los botones de icono y los que van dentro de una tabla no necesitan
+   el alto completo: alli el espacio es escaso y el area de toque la da la fila. */
+button.compacto,
+td button,
+th button {
+  min-height: 0;
 }
 
 .focus-ring {
   outline: none;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid #C9932E;
+  outline: 2px solid #007F66;
   outline-offset: 2px;
 }
