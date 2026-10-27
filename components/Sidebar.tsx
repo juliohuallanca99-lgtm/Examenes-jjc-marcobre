@@ -8,6 +8,14 @@ const EMAIL_SUPERADMIN = "70246124@jjc.com.pe";
 
 // Los iconos van dibujados como SVG y no como simbolos de texto: un simbolo
 // depende de la fuente del equipo y en varias maquinas se ve como un cuadro.
+function IconoInicio() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M3.2 8.4L10 3l6.8 5.4V16a1 1 0 01-1 1h-3.4v-4.6H7.6V17H4.2a1 1 0 01-1-1V8.4z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function IconoCursos() {
   return (
     <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -61,6 +69,7 @@ export default function Sidebar() {
     rol === "admin" && session?.user?.email?.toLowerCase() === EMAIL_SUPERADMIN;
 
   const enlaces = [
+    { href: "/inicio", etiqueta: "Inicio", icono: <IconoInicio />, visible: true },
     { href: "/", etiqueta: "Cursos", icono: <IconoCursos />, visible: true },
     { href: "/estadisticas", etiqueta: "Estadísticas", icono: <IconoEstadisticas />, visible: true },
     { href: "/verificacion", etiqueta: "Verificar capacitaciones", icono: <IconoVerificar />, visible: true },
