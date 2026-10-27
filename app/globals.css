@@ -16,25 +16,24 @@ body {
   background-color: #D9F2EC;
 }
 
-/* Minimo de 44 px de alto para botones y campos: es la medida que permite
-   acertar con guante puesto en una tablet de obra. */
-button,
-[type="button"],
-[type="submit"],
+/* Minimo de 44 px de alto en los campos de formulario: es la medida que
+   permite acertar con guante puesto en una tablet de obra.
+   No se incluyen los botones: varios tienen un alto propio ya definido
+   (los interruptores de estado miden 20 x 36 px) y forzarlos los deforma. */
 [type="text"],
 [type="search"],
 [type="date"],
 [type="number"],
 [type="password"],
+textarea,
 select {
   min-height: 44px;
 }
 
-/* Los botones de icono y los que van dentro de una tabla no necesitan
-   el alto completo: alli el espacio es escaso y el area de toque la da la fila. */
-button.compacto,
-td button,
-th button {
+/* Los selectores dentro de una tabla se quedan en su alto original:
+   alli el espacio es escaso y el area de toque la da la fila completa. */
+td select,
+th select {
   min-height: 0;
 }
 
