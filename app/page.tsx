@@ -222,7 +222,7 @@ export default function DashboardPage() {
               ) : (
                 <span className="truncate text-sm font-semibold text-slate-800">{nombre}</span>
               )}
-              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-500">
                 {conteo} {conteo === 1 ? "curso" : "cursos"}
               </span>
             </button>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                   actualizarCurso(curso.id, { carpetaId: e.target.value || null }).catch(() => {})
                 }
                 title="Mover a carpeta"
-                className="focus-ring w-full min-w-[6.5rem] rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[11px] text-slate-600"
+                className="focus-ring w-full min-w-[6rem] rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
               >
                 <option value="">Sin carpeta</option>
                 {carpetas.map((c) => (
@@ -457,13 +457,16 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full table-fixed text-left" style={{ minWidth: 760 }}>
+          {/* Los anchos acompañan al tamaño de letra: con la escala anterior
+              (12 px) bastaban 108 y 120 px, pero a 13 px la etiqueta de nota
+              mínima ya no entraba y se montaba sobre la columna vecina. */}
+          <table className="w-full table-fixed text-left" style={{ minWidth: 830 }}>
             <colgroup>
               <col style={{ width: "64px" }} />
               <col />
-              <col style={{ width: "108px" }} />
-              <col style={{ width: "120px" }} />
-              <col style={{ width: "216px" }} />
+              <col style={{ width: "124px" }} />
+              <col style={{ width: "146px" }} />
+              <col style={{ width: "244px" }} />
             </colgroup>
             <thead>
               <tr className="bg-slate-50">
