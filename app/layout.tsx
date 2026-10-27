@@ -4,7 +4,7 @@ import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import { AuthProvider } from "@/lib/auth";
 import AuthGate from "@/components/AuthGate";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
 import { ICON_192_BASE64 } from "@/lib/pwa-icons";
 
 const manrope = Manrope({
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#0F2138" };
+export const viewport: Viewport = { themeColor: "#202140" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -39,8 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <StoreProvider>
             <AuthGate>
-              <Header />
-              <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
+              <AppShell>{children}</AppShell>
             </AuthGate>
           </StoreProvider>
         </AuthProvider>
